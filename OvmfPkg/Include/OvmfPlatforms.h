@@ -43,4 +43,9 @@
 //
 #define ACPI_TIMER_OFFSET 0x8
 
+//
+// Device ID for emulated PCI host bridge used on virt platform
+//
+#define QEMU_GPEX_DEVICE_ID 0x8
+
 #endif
