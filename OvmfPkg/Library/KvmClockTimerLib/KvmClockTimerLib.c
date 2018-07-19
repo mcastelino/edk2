@@ -1,7 +1,7 @@
 /** @file
-  ACPI Timer implements one instance of Timer Library.
+  KVM Clock Timer implements one instance of Timer Library.
 
-  Copyright (c) 2008 - 2012, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2008 - 2018 Intel Corporation. All rights reserved.<BR>
   Copyright (c) 2011, Andrei Warkentin <andreiw@motorola.com>
 
   This program and the accompanying materials are
@@ -16,49 +16,39 @@
 
 #include <Library/DebugLib.h>
 #include <Library/BaseLib.h>
-#include <IndustryStandard/Acpi.h>
+#include <OvmfPlatforms.h>
 
-#include "AcpiTimerLib.h"
-
-//
-// The ACPI Time is a 24-bit counter
-//
-#define ACPI_TIMER_COUNT_SIZE  BIT24
+#include "KvmClockTimerLib.h"
 
 /**
-  Stalls the CPU for at least the given number of ticks.
+  Stalls the CPU for at least the given number of nanoseconds.
 
-  Stalls the CPU for at least the given number of ticks. It's invoked by
-  MicroSecondDelay() and NanoSecondDelay().
+  Stalls the CPU for the number of nanoseconds specified by NanoSeconds.
 
-  @param  Delay     A period of time to delay in ticks.
+  @param  NanoSeconds The minimum number of nanoseconds to delay.
+
+  @return NanoSeconds
 
 **/
-VOID
-InternalAcpiDelay (
-  IN      UINT32                    Delay
+UINTN
+EFIAPI
+NanoSecondDelay (
+  IN      UINTN                     NanoSeconds
   )
 {
-  UINT32                            Ticks;
-  UINT32                            Times;
+  UINT64 initial_tsc, target_tsc;
+  UINT64 freq;
 
-  Times    = Delay >> 22;
-  Delay   &= BIT22 - 1;
-  do {
-    //
-    // The target timer count is calculated here
-    //
-    Ticks    = InternalAcpiGetTimerTick () + Delay;
-    Delay    = BIT22;
-    //
-    // Wait until time out
-    // Delay >= 2^23 could not be handled by this function
-    // Timer wrap-arounds are handled correctly by this function
-    //
-    while (((Ticks - InternalAcpiGetTimerTick ()) & BIT23) == 0) {
-      CpuPause ();
-    }
-  } while (Times-- > 0);
+  freq = QueryKVMClockTscKhz();
+
+  initial_tsc = AsmReadTsc();
+  target_tsc = initial_tsc + (MultU64x32(freq, NanoSeconds) / 1000000ULL);
+
+  while (AsmReadTsc() < target_tsc) {
+    CpuPause();
+  }
+
+  return NanoSeconds;
 }
 
 /**
@@ -77,45 +67,10 @@ MicroSecondDelay (
   IN      UINTN                     MicroSeconds
   )
 {
-  InternalAcpiDelay (
-    (UINT32)DivU64x32 (
-              MultU64x32 (
-                MicroSeconds,
-                ACPI_TIMER_FREQUENCY
-                ),
-              1000000u
-              )
-    );
+  NanoSecondDelay(MicroSeconds * 1000U);
   return MicroSeconds;
 }
 
-/**
-  Stalls the CPU for at least the given number of nanoseconds.
-
-  Stalls the CPU for the number of nanoseconds specified by NanoSeconds.
-
-  @param  NanoSeconds The minimum number of nanoseconds to delay.
-
-  @return NanoSeconds
-
-**/
-UINTN
-EFIAPI
-NanoSecondDelay (
-  IN      UINTN                     NanoSeconds
-  )
-{
-  InternalAcpiDelay (
-    (UINT32)DivU64x32 (
-              MultU64x32 (
-                NanoSeconds,
-                ACPI_TIMER_FREQUENCY
-                ),
-              1000000000u
-              )
-    );
-  return NanoSeconds;
-}
 
 /**
   Retrieves the current value of a 64-bit free running performance counter.
@@ -135,7 +90,7 @@ GetPerformanceCounter (
   VOID
   )
 {
-  return (UINT64)InternalAcpiGetTimerTick ();
+  return AsmReadTsc();
 }
 
 /**
@@ -173,10 +128,10 @@ GetPerformanceCounterProperties (
   }
 
   if (EndValue != NULL) {
-    *EndValue = ACPI_TIMER_COUNT_SIZE - 1;
+    *EndValue = __UINT64_MAX__;
   }
 
-  return ACPI_TIMER_FREQUENCY;
+  return MultU64x32(QueryKVMClockTscKhz(), 1000U);
 }
 
 /**
@@ -204,13 +159,13 @@ GetTimeInNanoSecond (
   // Time = --------- x 1,000,000,000
   //        Frequency
   //
-  NanoSeconds = MultU64x32 (DivU64x32Remainder (Ticks, ACPI_TIMER_FREQUENCY, &Remainder), 1000000000u);
+  NanoSeconds = MultU64x32 (DivU64x32Remainder (Ticks, MultU64x32(QueryKVMClockTscKhz(), 1000U), &Remainder), 1000000000u);
 
   //
   // Frequency < 0x100000000, so Remainder < 0x100000000, then (Remainder * 1,000,000,000)
   // will not overflow 64-bit.
   //
-  NanoSeconds += DivU64x32 (MultU64x32 ((UINT64) Remainder, 1000000000u), ACPI_TIMER_FREQUENCY);
+  NanoSeconds += DivU64x32 (MultU64x32 ((UINT64) Remainder, 1000000000u), MultU64x32(QueryKVMClockTscKhz(), 1000U));
 
   return NanoSeconds;
 }

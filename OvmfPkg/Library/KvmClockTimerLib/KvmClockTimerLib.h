@@ -2,6 +2,7 @@
   Internal definitions for ACPI Timer Library
 
   Copyright (C) 2014, Gabriel L. Somlo <somlo@cmu.edu>
+  Copyright (C) 2018, Intel Corporation
 
   This program and the accompanying materials are licensed and made
   available under the terms and conditions of the BSD License which
@@ -12,18 +13,12 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef _ACPI_TIMER_LIB_INTERNAL_H_
-#define _ACPI_TIMER_LIB_INTERNAL_H_
+#ifndef _KVM_CLOCK_TIMER_LIB_H_
+#define _KVM_CLOCK_TIMER_LIB_H_
 
-/**
-  Internal function to read the current tick counter of ACPI.
-
-  @return The tick counter read.
-
-**/
-UINT32
-InternalAcpiGetTimerTick (
+UINT64
+QueryKVMClockTscKhz(
   VOID
-  );
+);
 
-#endif // _ACPI_TIMER_LIB_INTERNAL_H_
+#endif // _KVM_CLOCK_TIMER_LIB_H_

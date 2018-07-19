@@ -1,5 +1,5 @@
 ## @file
-#  DXE ACPI Timer Library Instance.
+#  DXE KVM Clock Timer Library Instance.
 #
 #  Copyright (C) 2014, Gabriel L. Somlo <somlo@cmu.edu>
 #  Copyright (c) 2008 - 2010, Intel Corporation. All rights reserved.
@@ -16,26 +16,21 @@
 
 [Defines]
   INF_VERSION    = 0x00010005
-  BASE_NAME      = DxeAcpiTimerLib
-  FILE_GUID      = 52DECA02-2EE8-4EAA-8EAD-1AB83F8A5955
+  BASE_NAME      = DxeKvmClockTimerLib
+  FILE_GUID      = db11f520-c9cd-4317-a381-bd249c5d58d5
   MODULE_TYPE    = BASE
   VERSION_STRING = 1.0
   LIBRARY_CLASS  = TimerLib|DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SMM_DRIVER UEFI_DRIVER UEFI_APPLICATION SMM_CORE
-  CONSTRUCTOR    = AcpiTimerLibConstructor
+  CONSTRUCTOR    = KVMClockTimerLibConstructor
 
 [Sources]
-  AcpiTimerLib.c
-  AcpiTimerLib.h
-  DxeAcpiTimerLib.c
+  KvmClockTimerLib.c
+  KvmClockTimerLib.h
+  DxeKvmClockTimerLib.c
 
 [Packages]
   MdePkg/MdePkg.dec
   OvmfPkg/OvmfPkg.dec
 
-[Pcd]
-  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfHostBridgePciDevId
-
 [LibraryClasses]
   BaseLib
-  PciLib
-  IoLib
