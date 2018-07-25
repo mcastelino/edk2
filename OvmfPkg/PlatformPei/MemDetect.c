@@ -206,6 +206,7 @@ ScanOrAdd64BitE820Ram (
   return EFI_SUCCESS;
 }
 
+#define LOWMEM_SIZE 0xc0000000UL
 
 UINT32
 GetSystemMemorySizeBelow4gb (
@@ -214,6 +215,13 @@ GetSystemMemorySizeBelow4gb (
 {
   UINT8 Cmos0x34;
   UINT8 Cmos0x35;
+  UINT64 MemorySize;
+
+  QemuFwCfgSelectItem (QemuFwCfgItemRamSize);
+  MemorySize = QemuFwCfgRead64 ();
+  if (MemorySize > 0){
+    return MemorySize > LOWMEM_SIZE ? LOWMEM_SIZE : MemorySize;
+  }
 
   //
   // CMOS 0x34/0x35 specifies the system memory above 16 MB.
@@ -238,6 +246,13 @@ GetSystemMemorySizeAbove4gb (
 {
   UINT32 Size;
   UINTN  CmosIndex;
+  UINT64 MemorySize;
+
+  QemuFwCfgSelectItem (QemuFwCfgItemRamSize);
+  MemorySize = QemuFwCfgRead64 ();
+  if (MemorySize > 0){
+    return MemorySize > LOWMEM_SIZE ? MemorySize - LOWMEM_SIZE: 0;
+  }
 
   //
   // CMOS 0x5b-0x5d specifies the system memory above 4GB MB.
