@@ -206,36 +206,36 @@ ScanOrAdd64BitE820Ram (
   return EFI_SUCCESS;
 }
 
-#define LOWMEM_SIZE 0xc0000000UL
-
 UINT32
 GetSystemMemorySizeBelow4gb (
   VOID
   )
 {
-  UINT8 Cmos0x34;
-  UINT8 Cmos0x35;
-  UINT64 MemorySize;
+  EFI_STATUS           Status;
+  FIRMWARE_CONFIG_ITEM FwCfgItem;
+  UINTN                FwCfgSize;
+  EFI_E820_ENTRY64     E820Entry;
+  UINTN                Processed;
 
-  QemuFwCfgSelectItem (QemuFwCfgItemRamSize);
-  MemorySize = QemuFwCfgRead64 ();
-  if (MemorySize > 0){
-    return MemorySize > LOWMEM_SIZE ? LOWMEM_SIZE : MemorySize;
+  Status = QemuFwCfgFindFile ("etc/e820", &FwCfgItem, &FwCfgSize);
+  if (EFI_ERROR (Status)) {
+    return 0;
+  }
+  if (FwCfgSize % sizeof E820Entry != 0) {
+    return 0;
   }
 
-  //
-  // CMOS 0x34/0x35 specifies the system memory above 16 MB.
-  // * CMOS(0x35) is the high byte
-  // * CMOS(0x34) is the low byte
-  // * The size is specified in 64kb chunks
-  // * Since this is memory above 16MB, the 16MB must be added
-  //   into the calculation to get the total memory size.
-  //
-
-  Cmos0x34 = (UINT8) CmosRead8 (0x34);
-  Cmos0x35 = (UINT8) CmosRead8 (0x35);
-
-  return (UINT32) (((UINTN)((Cmos0x35 << 8) + Cmos0x34) << 16) + SIZE_16MB);
+  QemuFwCfgSelectItem (FwCfgItem);
+  for (Processed = 0; Processed < FwCfgSize; Processed += sizeof E820Entry) {
+    QemuFwCfgReadBytes (sizeof E820Entry, &E820Entry);
+    // Assumes just one RAM entry.
+    if (E820Entry.Type == EfiAcpiAddressRangeMemory &&
+        E820Entry.BaseAddr < BASE_4GB) {
+          return (UINT32)E820Entry.Length;
+    }
+  }
+  
+  return 0;
 }
 
 
@@ -244,30 +244,31 @@ UINT64
 GetSystemMemorySizeAbove4gb (
   )
 {
-  UINT32 Size;
-  UINTN  CmosIndex;
-  UINT64 MemorySize;
+  EFI_STATUS           Status;
+  FIRMWARE_CONFIG_ITEM FwCfgItem;
+  UINTN                FwCfgSize;
+  EFI_E820_ENTRY64     E820Entry;
+  UINTN                Processed;
 
-  QemuFwCfgSelectItem (QemuFwCfgItemRamSize);
-  MemorySize = QemuFwCfgRead64 ();
-  if (MemorySize > 0){
-    return MemorySize > LOWMEM_SIZE ? MemorySize - LOWMEM_SIZE: 0;
+  Status = QemuFwCfgFindFile ("etc/e820", &FwCfgItem, &FwCfgSize);
+  if (EFI_ERROR (Status)) {
+    return 0;
+  }
+  if (FwCfgSize % sizeof E820Entry != 0) {
+    return 0;
   }
 
-  //
-  // CMOS 0x5b-0x5d specifies the system memory above 4GB MB.
-  // * CMOS(0x5d) is the most significant size byte
-  // * CMOS(0x5c) is the middle size byte
-  // * CMOS(0x5b) is the least significant size byte
-  // * The size is specified in 64kb chunks
-  //
-
-  Size = 0;
-  for (CmosIndex = 0x5d; CmosIndex >= 0x5b; CmosIndex--) {
-    Size = (UINT32) (Size << 8) + (UINT32) CmosRead8 (CmosIndex);
+  QemuFwCfgSelectItem (FwCfgItem);
+  for (Processed = 0; Processed < FwCfgSize; Processed += sizeof E820Entry) {
+    QemuFwCfgReadBytes (sizeof E820Entry, &E820Entry);
+    // Assumes just one RAM entry.
+    if (E820Entry.Type == EfiAcpiAddressRangeMemory &&
+        E820Entry.BaseAddr >= BASE_4GB) {
+          return E820Entry.Length;
+    }
   }
-
-  return LShiftU64 (Size, 16);
+  
+  return 0;
 }
 
 
