@@ -187,7 +187,8 @@ MemMapInitialization (
 
     TopOfLowRam = GetSystemMemorySizeBelow4gb ();
     PciExBarBase = 0;
-    if (mHostBridgeDevId == INTEL_Q35_MCH_DEVICE_ID) {
+    if (mHostBridgeDevId == INTEL_Q35_MCH_DEVICE_ID ||
+        mHostBridgeDevId == QEMU_GPEX_DEVICE_ID) {
       //
       // The MMCONFIG area is expected to fall between the top of low RAM and
       // the base of the 32-bit PCI host aperture.
@@ -249,6 +250,13 @@ MemMapInitialization (
       BuildMemoryAllocationHob (PciExBarBase, SIZE_256MB,
         EfiReservedMemoryType);
     }
+
+    if (mHostBridgeDevId == QEMU_GPEX_DEVICE_ID) {
+      AddReservedMemoryBaseSizeHob (PciExBarBase, SIZE_256MB, FALSE);
+      BuildMemoryAllocationHob (PciExBarBase, SIZE_256MB,
+        EfiReservedMemoryType);
+    }
+    
     AddIoMemoryBaseSizeHob (PcdGet32(PcdCpuLocalApicBaseAddress), SIZE_1MB);
 
     //
