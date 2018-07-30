@@ -1,0 +1,17 @@
+language: c
+dist: trusty
+sudo: true
+before_install:
+ - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+ - sudo apt-get update
+ - sudo apt-get install build-essential uuid-dev iasl git gcc-5 nasm
+script:
+ - make -C BaseTools
+ - bash -c ". edksetup.sh; build"
+deploy:
+  provider: releases
+  api_key: $GITHUB_OAUTH_TOKEN
+  file: Build/OvmfX64/DEBUG_GCC5/FV/OVMF.fd
+  skip_cleanup: true
+  on:
+    tags: true
