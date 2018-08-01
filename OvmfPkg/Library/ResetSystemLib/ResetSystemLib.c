@@ -50,6 +50,18 @@ AcpiPmControl (
   IoOr16 (AcpiPmBaseAddress + 4, BIT13);
   CpuDeadLoop ();
 }
+/**
+  HW-reduced ACPI uses sleep_control_register to do shutdown.
+**/
+VOID
+AcpiReducedSleepControl (
+  UINTN SuspendType
+  )
+{
+  IoWrite16(VIRT_SLEEP_CONTROL_ADDRESS,
+            SuspendType << 2 | ACPI_REDUCED_SLEEP_EN);
+  CpuDeadLoop ();
+}
 
 /**
   Calling this function causes a system-wide reset. This sets
@@ -103,7 +115,17 @@ ResetShutdown (
   VOID
   )
 {
-  AcpiPmControl (0);
+  UINT16 HostBridgeDevId;
+
+  HostBridgeDevId = PciRead16 (OVMF_HOSTBRIDGE_DID);
+  switch (HostBridgeDevId) {
+  case QEMU_GPEX_DEVICE_ID:
+    AcpiReducedSleepControl (ACPI_REDUCED_SLEEP_TYPE);
+    break;
+  default:
+    AcpiPmControl (0);
+    break;
+  }
   ASSERT (FALSE);
 }
 

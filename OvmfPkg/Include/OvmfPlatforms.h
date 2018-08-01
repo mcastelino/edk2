@@ -48,4 +48,14 @@
 //
 #define QEMU_GPEX_DEVICE_ID 0x8
 
+//
+// SLP_TYP and SLP_EN values for HW-reduced ACPI used on virt platform
+//
+#define ACPI_REDUCED_SLEEP_EN   (1<<5)
+#define ACPI_REDUCED_SLEEP_TYPE 5 
+
+//
+// Values for sleep control ioport address used on virt platform
+//
+#define VIRT_SLEEP_CONTROL_ADDRESS 0x3B0
 #endif
