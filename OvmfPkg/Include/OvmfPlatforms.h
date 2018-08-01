@@ -55,7 +55,17 @@
 #define ACPI_REDUCED_SLEEP_TYPE 5 
 
 //
+// RESET_VALUE for HW-reduced ACPI used on virt platform
+//
+#define ACPI_REDUCED_RESET_VALUE 4
+
+//
 // Values for sleep control ioport address used on virt platform
 //
 #define VIRT_SLEEP_CONTROL_ADDRESS 0x3B0
+
+//
+// Values for reset ioport address used on virt platform
+//
+#define VIRT_RESET_ADDRESS 0x3C0
 #endif

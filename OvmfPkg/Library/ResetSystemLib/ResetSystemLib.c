@@ -98,8 +98,19 @@ ResetWarm (
   VOID
   )
 {
-  IoWrite8 (0x64, 0xfe);
-  CpuDeadLoop ();
+  UINT16 HostBridgeDevId;
+
+  HostBridgeDevId = PciRead16 (OVMF_HOSTBRIDGE_DID);
+  switch (HostBridgeDevId) {
+  case QEMU_GPEX_DEVICE_ID:
+    IoWrite8 (VIRT_RESET_ADDRESS, ACPI_REDUCED_RESET_VALUE);
+    CpuDeadLoop ();
+    break;
+  default:
+    IoWrite8 (0x64, 0xfe);
+    CpuDeadLoop ();
+    break;
+  }
 }
 
 /**
