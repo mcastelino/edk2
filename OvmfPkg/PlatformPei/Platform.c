@@ -262,8 +262,8 @@ MemMapInitialization (
 
     //TODO: Hack for now. We need to get this information from the
     //e820 map passed in from QEMU
-    AddReservedMemoryBaseSizeHob (0x70000000, SIZE_256MB, FALSE);
-    BuildMemoryAllocationHob (0x70000000, SIZE_256MB, EfiReservedMemoryType);
+    AddReservedMemoryBaseSizeHob (0x60000000, SIZE_256MB, FALSE);
+    BuildMemoryAllocationHob (0x60000000, SIZE_256MB, EfiReservedMemoryType);
     
     AddIoMemoryBaseSizeHob (PcdGet32(PcdCpuLocalApicBaseAddress), SIZE_1MB);
 
