@@ -62,7 +62,7 @@ EFI_PEI_PPI_DESCRIPTOR   mPpiBootMode[] = {
   }
 };
 
-
+//TODO: This assumes a single segment
 UINT16 mHostBridgeDevId;
 
 EFI_BOOT_MODE mBootMode = BOOT_WITH_FULL_CONFIGURATION;
@@ -200,6 +200,9 @@ MemMapInitialization (
     } else {
       PciBase = (TopOfLowRam < BASE_2GB) ? BASE_2GB : TopOfLowRam;
     }
+    DEBUG ((DEBUG_INFO, "%a: PciExBarBase %x\n", __FUNCTION__, PciExBarBase));
+    DEBUG ((DEBUG_INFO, "%a: PciBase %x\n", __FUNCTION__, PciBase));
+
 
     //
     // address       purpose   size
@@ -256,6 +259,11 @@ MemMapInitialization (
       BuildMemoryAllocationHob (PciExBarBase, SIZE_256MB,
         EfiReservedMemoryType);
     }
+
+    //TODO: Hack for now. We need to get this information from the
+    //e820 map passed in from QEMU
+    AddReservedMemoryBaseSizeHob (0x70000000, SIZE_256MB, FALSE);
+    BuildMemoryAllocationHob (0x70000000, SIZE_256MB, EfiReservedMemoryType);
     
     AddIoMemoryBaseSizeHob (PcdGet32(PcdCpuLocalApicBaseAddress), SIZE_1MB);
 
@@ -661,6 +669,8 @@ InitializePlatform (
   //
   // Query Host Bridge DID
   //
+  //TODO: This assumes a single host bridge
+  //Also it does a I/O port read and not a memory read
   mHostBridgeDevId = PciRead16 (OVMF_HOSTBRIDGE_DID);
 
   if (FeaturePcdGet (PcdSmmSmramRequire)) {
