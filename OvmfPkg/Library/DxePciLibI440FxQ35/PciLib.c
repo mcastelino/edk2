@@ -30,8 +30,10 @@
 #include <Library/PciCf8Lib.h>
 #include <Library/PciExpressLib.h>
 #include <Library/PcdLib.h>
+#include "OvmfPlatforms.h"
 
-STATIC BOOLEAN mRunningOnQ35;
+/* Both Q35 and Virt support PCI Express MMIO */
+STATIC BOOLEAN mRunningOnQ35OrVirt;
 
 RETURN_STATUS
 EFIAPI
@@ -39,8 +41,10 @@ InitializeConfigAccessMethod (
   VOID
   )
 {
-  mRunningOnQ35 = (PcdGet16 (PcdOvmfHostBridgePciDevId) ==
-                   INTEL_Q35_MCH_DEVICE_ID);
+  UINT16 hostBridgeId = PcdGet16 (PcdOvmfHostBridgePciDevId);
+  mRunningOnQ35OrVirt = ((hostBridgeId == INTEL_Q35_MCH_DEVICE_ID) || 
+                         (hostBridgeId == QEMU_GPEX_DEVICE_ID));
+
   return RETURN_SUCCESS;
 }
 
@@ -71,7 +75,7 @@ PciRegisterForRuntimeAccess (
   IN UINTN  Address
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressRegisterForRuntimeAccess (Address) :
          PciCf8RegisterForRuntimeAccess (Address);
 }
@@ -97,7 +101,7 @@ PciRead8 (
   IN      UINTN                     Address
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressRead8 (Address) :
          PciCf8Read8 (Address);
 }
@@ -125,7 +129,7 @@ PciWrite8 (
   IN      UINT8                     Value
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressWrite8 (Address, Value) :
          PciCf8Write8 (Address, Value);
 }
@@ -157,7 +161,7 @@ PciOr8 (
   IN      UINT8                     OrData
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressOr8 (Address, OrData) :
          PciCf8Or8 (Address, OrData);
 }
@@ -189,7 +193,7 @@ PciAnd8 (
   IN      UINT8                     AndData
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressAnd8 (Address, AndData) :
          PciCf8And8 (Address, AndData);
 }
@@ -224,7 +228,7 @@ PciAndThenOr8 (
   IN      UINT8                     OrData
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressAndThenOr8 (Address, AndData, OrData) :
          PciCf8AndThenOr8 (Address, AndData, OrData);
 }
@@ -258,7 +262,7 @@ PciBitFieldRead8 (
   IN      UINTN                     EndBit
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressBitFieldRead8 (Address, StartBit, EndBit) :
          PciCf8BitFieldRead8 (Address, StartBit, EndBit);
 }
@@ -296,7 +300,7 @@ PciBitFieldWrite8 (
   IN      UINT8                     Value
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressBitFieldWrite8 (Address, StartBit, EndBit, Value) :
          PciCf8BitFieldWrite8 (Address, StartBit, EndBit, Value);
 }
@@ -337,7 +341,7 @@ PciBitFieldOr8 (
   IN      UINT8                     OrData
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressBitFieldOr8 (Address, StartBit, EndBit, OrData) :
          PciCf8BitFieldOr8 (Address, StartBit, EndBit, OrData);
 }
@@ -378,7 +382,7 @@ PciBitFieldAnd8 (
   IN      UINT8                     AndData
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressBitFieldAnd8 (Address, StartBit, EndBit, AndData) :
          PciCf8BitFieldAnd8 (Address, StartBit, EndBit, AndData);
 }
@@ -424,7 +428,7 @@ PciBitFieldAndThenOr8 (
   IN      UINT8                     OrData
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressBitFieldAndThenOr8 (Address, StartBit, EndBit, AndData, OrData) :
          PciCf8BitFieldAndThenOr8 (Address, StartBit, EndBit, AndData, OrData);
 }
@@ -451,7 +455,7 @@ PciRead16 (
   IN      UINTN                     Address
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressRead16 (Address) :
          PciCf8Read16 (Address);
 }
@@ -480,7 +484,7 @@ PciWrite16 (
   IN      UINT16                    Value
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressWrite16 (Address, Value) :
          PciCf8Write16 (Address, Value);
 }
@@ -513,7 +517,7 @@ PciOr16 (
   IN      UINT16                    OrData
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressOr16 (Address, OrData) :
          PciCf8Or16 (Address, OrData);
 }
@@ -546,7 +550,7 @@ PciAnd16 (
   IN      UINT16                    AndData
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressAnd16 (Address, AndData) :
          PciCf8And16 (Address, AndData);
 }
@@ -582,7 +586,7 @@ PciAndThenOr16 (
   IN      UINT16                    OrData
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressAndThenOr16 (Address, AndData, OrData) :
          PciCf8AndThenOr16 (Address, AndData, OrData);
 }
@@ -617,7 +621,7 @@ PciBitFieldRead16 (
   IN      UINTN                     EndBit
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressBitFieldRead16 (Address, StartBit, EndBit) :
          PciCf8BitFieldRead16 (Address, StartBit, EndBit);
 }
@@ -656,7 +660,7 @@ PciBitFieldWrite16 (
   IN      UINT16                    Value
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressBitFieldWrite16 (Address, StartBit, EndBit, Value) :
          PciCf8BitFieldWrite16 (Address, StartBit, EndBit, Value);
 }
@@ -698,7 +702,7 @@ PciBitFieldOr16 (
   IN      UINT16                    OrData
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressBitFieldOr16 (Address, StartBit, EndBit, OrData) :
          PciCf8BitFieldOr16 (Address, StartBit, EndBit, OrData);
 }
@@ -740,7 +744,7 @@ PciBitFieldAnd16 (
   IN      UINT16                    AndData
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressBitFieldAnd16 (Address, StartBit, EndBit, AndData) :
          PciCf8BitFieldAnd16 (Address, StartBit, EndBit, AndData);
 }
@@ -787,7 +791,7 @@ PciBitFieldAndThenOr16 (
   IN      UINT16                    OrData
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressBitFieldAndThenOr16 (Address, StartBit, EndBit, AndData, OrData) :
          PciCf8BitFieldAndThenOr16 (Address, StartBit, EndBit, AndData, OrData);
 }
@@ -814,7 +818,7 @@ PciRead32 (
   IN      UINTN                     Address
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressRead32 (Address) :
          PciCf8Read32 (Address);
 }
@@ -843,7 +847,7 @@ PciWrite32 (
   IN      UINT32                    Value
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressWrite32 (Address, Value) :
          PciCf8Write32 (Address, Value);
 }
@@ -876,7 +880,7 @@ PciOr32 (
   IN      UINT32                    OrData
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressOr32 (Address, OrData) :
          PciCf8Or32 (Address, OrData);
 }
@@ -909,7 +913,7 @@ PciAnd32 (
   IN      UINT32                    AndData
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressAnd32 (Address, AndData) :
          PciCf8And32 (Address, AndData);
 }
@@ -945,7 +949,7 @@ PciAndThenOr32 (
   IN      UINT32                    OrData
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressAndThenOr32 (Address, AndData, OrData) :
          PciCf8AndThenOr32 (Address, AndData, OrData);
 }
@@ -980,7 +984,7 @@ PciBitFieldRead32 (
   IN      UINTN                     EndBit
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressBitFieldRead32 (Address, StartBit, EndBit) :
          PciCf8BitFieldRead32 (Address, StartBit, EndBit);
 }
@@ -1019,7 +1023,7 @@ PciBitFieldWrite32 (
   IN      UINT32                    Value
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressBitFieldWrite32 (Address, StartBit, EndBit, Value) :
          PciCf8BitFieldWrite32 (Address, StartBit, EndBit, Value);
 }
@@ -1061,7 +1065,7 @@ PciBitFieldOr32 (
   IN      UINT32                    OrData
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressBitFieldOr32 (Address, StartBit, EndBit, OrData) :
          PciCf8BitFieldOr32 (Address, StartBit, EndBit, OrData);
 }
@@ -1103,7 +1107,7 @@ PciBitFieldAnd32 (
   IN      UINT32                    AndData
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressBitFieldAnd32 (Address, StartBit, EndBit, AndData) :
          PciCf8BitFieldAnd32 (Address, StartBit, EndBit, AndData);
 }
@@ -1150,7 +1154,7 @@ PciBitFieldAndThenOr32 (
   IN      UINT32                    OrData
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressBitFieldAndThenOr32 (Address, StartBit, EndBit, AndData, OrData) :
          PciCf8BitFieldAndThenOr32 (Address, StartBit, EndBit, AndData, OrData);
 }
@@ -1186,7 +1190,7 @@ PciReadBuffer (
   OUT     VOID                      *Buffer
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressReadBuffer (StartAddress, Size, Buffer) :
          PciCf8ReadBuffer (StartAddress, Size, Buffer);
 }
@@ -1223,7 +1227,7 @@ PciWriteBuffer (
   IN      VOID                      *Buffer
   )
 {
-  return mRunningOnQ35 ?
+  return mRunningOnQ35OrVirt ?
          PciExpressWriteBuffer (StartAddress, Size, Buffer) :
          PciCf8WriteBuffer (StartAddress, Size, Buffer);
 }
