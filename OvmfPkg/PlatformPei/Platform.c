@@ -64,6 +64,7 @@ EFI_PEI_PPI_DESCRIPTOR   mPpiBootMode[] = {
 
 
 UINT16 mHostBridgeDevId;
+UINT16 mMachineId;
 
 EFI_BOOT_MODE mBootMode = BOOT_WITH_FULL_CONFIGURATION;
 
@@ -188,7 +189,7 @@ MemMapInitialization (
     TopOfLowRam = GetSystemMemorySizeBelow4gb ();
     PciExBarBase = 0;
     if (mHostBridgeDevId == INTEL_Q35_MCH_DEVICE_ID ||
-        mHostBridgeDevId == QEMU_GPEX_DEVICE_ID) {
+        mHostBridgeDevId == VIRT_QEMU_DEVICE_ID) {
       //
       // The MMCONFIG area is expected to fall between the top of low RAM and
       // the base of the 32-bit PCI host aperture.
@@ -251,7 +252,7 @@ MemMapInitialization (
         EfiReservedMemoryType);
     }
 
-    if (mHostBridgeDevId == QEMU_GPEX_DEVICE_ID) {
+    if (mHostBridgeDevId == VIRT_QEMU_DEVICE_ID) {
       AddReservedMemoryBaseSizeHob (PciExBarBase, SIZE_256MB, FALSE);
       BuildMemoryAllocationHob (PciExBarBase, SIZE_256MB,
         EfiReservedMemoryType);
@@ -440,7 +441,7 @@ MiscInitialization (
       AcpiCtlReg = POWER_MGMT_REGISTER_Q35 (ICH9_ACPI_CNTL);
       AcpiEnBit  = ICH9_ACPI_CNTL_ACPI_EN;
       break;
-    case QEMU_GPEX_DEVICE_ID:
+    case VIRT_QEMU_DEVICE_ID:
       // No need to enable ACPI for any other PM features on this platform
 
       return;
@@ -658,10 +659,23 @@ InitializePlatform (
   AddressWidthInitialization ();
   MaxCpuCountInitialization ();
 
-  //
-  // Query Host Bridge DID
-  //
-  mHostBridgeDevId = PciRead16 (OVMF_HOSTBRIDGE_DID);
+  QemuFwCfgSelectItem (QemuFwCfgItemMachineId);
+  mMachineId = QemuFwCfgRead16 ();
+
+  switch (mMachineId) {
+    case X86_I440FX:
+      mHostBridgeDevId = INTEL_82441_DEVICE_ID;
+      break;
+    case X86_Q35:
+      mHostBridgeDevId = INTEL_Q35_MCH_DEVICE_ID;
+      break;
+    case X86_VIRT:
+      mHostBridgeDevId = VIRT_QEMU_DEVICE_ID;
+      break;
+    default:
+      mHostBridgeDevId = PciRead16 (OVMF_HOSTBRIDGE_DID);
+      break;
+  }
 
   if (FeaturePcdGet (PcdSmmSmramRequire)) {
     Q35TsegMbytesInitialization ();

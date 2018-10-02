@@ -797,6 +797,7 @@ DriverInitialize (
 
   mPciExtConfSpaceSupported = (PcdGet16 (PcdOvmfHostBridgePciDevId) ==
                                INTEL_Q35_MCH_DEVICE_ID);
+
   mPciHotPlugInit.GetRootHpcList = GetRootHpcList;
   mPciHotPlugInit.InitializeRootHpc = InitializeRootHpc;
   mPciHotPlugInit.GetResourcePadding = GetResourcePadding;

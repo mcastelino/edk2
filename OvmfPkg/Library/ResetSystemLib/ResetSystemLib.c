@@ -102,7 +102,7 @@ ResetWarm (
 
   HostBridgeDevId = PciRead16 (OVMF_HOSTBRIDGE_DID);
   switch (HostBridgeDevId) {
-  case QEMU_GPEX_DEVICE_ID:
+  case VIRT_QEMU_DEVICE_ID:
     IoWrite8 (VIRT_RESET_ADDRESS, ACPI_REDUCED_RESET_VALUE);
     CpuDeadLoop ();
     break;
@@ -130,7 +130,7 @@ ResetShutdown (
 
   HostBridgeDevId = PciRead16 (OVMF_HOSTBRIDGE_DID);
   switch (HostBridgeDevId) {
-  case QEMU_GPEX_DEVICE_ID:
+  case VIRT_QEMU_DEVICE_ID:
     AcpiReducedSleepControl (ACPI_REDUCED_SLEEP_TYPE);
     break;
   default:
