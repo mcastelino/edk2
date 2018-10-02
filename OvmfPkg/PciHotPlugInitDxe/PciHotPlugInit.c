@@ -798,7 +798,7 @@ DriverInitialize (
   UINT16 hostBridgeId = PcdGet16 (PcdOvmfHostBridgePciDevId);
 
   mPciExtConfSpaceSupported = ((hostBridgeId == INTEL_Q35_MCH_DEVICE_ID) ||
-	                             (hostBridgeId == QEMU_GPEX_DEVICE_ID));
+	                             (hostBridgeId == VIRT_QEMU_DEVICE_ID));
   mPciHotPlugInit.GetRootHpcList = GetRootHpcList;
   mPciHotPlugInit.InitializeRootHpc = InitializeRootHpc;
   mPciHotPlugInit.GetResourcePadding = GetResourcePadding;

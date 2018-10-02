@@ -44,7 +44,7 @@ InitializeConfigAccessMethod (
 
   /* Both Q35 and Virt support PCI Express */
   mRunningOnPciExpress = ((hostBridgeId == INTEL_Q35_MCH_DEVICE_ID) ||
-                         (hostBridgeId == QEMU_GPEX_DEVICE_ID));
+                         (hostBridgeId == VIRT_QEMU_DEVICE_ID));
 
   return RETURN_SUCCESS;
 }

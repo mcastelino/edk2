@@ -20,6 +20,7 @@
 #include <IndustryStandard/Pci22.h>
 #include <IndustryStandard/Q35MchIch9.h>
 #include <IndustryStandard/I440FxPiix4.h>
+#include <IndustryStandard/X86Virt.h>
 
 //
 // OVMF Host Bridge DID Address
@@ -44,28 +45,15 @@
 #define ACPI_TIMER_OFFSET 0x8
 
 //
-// Device ID for emulated PCI host bridge used on virt platform
+// QEMU defined machine ids
 //
-#define QEMU_GPEX_DEVICE_ID 0x8
+enum {
+        X86_I440FX = 1,
+        X86_Q35,
+        X86_ISAPC,
+        X86_XENFV,
+        X86_XENPV,
+        X86_VIRT,
+};
 
-//
-// SLP_TYP and SLP_EN values for HW-reduced ACPI used on virt platform
-//
-#define ACPI_REDUCED_SLEEP_EN   (1<<5)
-#define ACPI_REDUCED_SLEEP_TYPE 5 
-
-//
-// RESET_VALUE for HW-reduced ACPI used on virt platform
-//
-#define ACPI_REDUCED_RESET_VALUE 4
-
-//
-// Values for sleep control ioport address used on virt platform
-//
-#define VIRT_SLEEP_CONTROL_ADDRESS 0x3B0
-
-//
-// Values for reset ioport address used on virt platform
-//
-#define VIRT_RESET_ADDRESS 0x3C0
 #endif
