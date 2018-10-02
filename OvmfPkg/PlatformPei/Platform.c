@@ -667,11 +667,14 @@ InitializePlatform (
   MaxCpuCountInitialization ();
 
   //
-  // Query Host Bridge DID
+  // Query Host Bridge DID using FwCfg
   //
-  //TODO: This assumes a single host bridge
-  //Also it does a I/O port read and not a memory read
-  mHostBridgeDevId = PciRead16 (OVMF_HOSTBRIDGE_DID);
+  QemuFwCfgSelectItem (QemuFwCfgItemMachineId);
+  mHostBridgeDevId = QemuFwCfgRead16 ();
+
+  if (mHostBridgeDevId == 0) {
+    mHostBridgeDevId = PciRead16 (OVMF_HOSTBRIDGE_DID);
+  }
 
   if (FeaturePcdGet (PcdSmmSmramRequire)) {
     Q35TsegMbytesInitialization ();
