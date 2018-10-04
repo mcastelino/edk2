@@ -22,6 +22,12 @@
 
 #include <OvmfPlatforms.h>
 
+#define PCI_CONFIGURATION_ADDRESS_PORT  0xCF8
+#define PCI_CONFIGURATION_DATA_PORT     0xCFC
+
+#define PCI_TO_CF8_ADDRESS(A) \
+  ((UINT32) ((((A) >> 4) & 0x00ffff00) | ((A) & 0xfc) | 0x80000000))
+
 VOID
 AcpiPmControl (
   UINTN SuspendType
@@ -100,7 +106,9 @@ ResetWarm (
 {
   UINT16 HostBridgeDevId;
 
-  HostBridgeDevId = PciRead16 (OVMF_HOSTBRIDGE_DID);
+  //HostBridgeDevId = PciRead16 (OVMF_HOSTBRIDGE_DID);
+  IoWrite32 (PCI_CONFIGURATION_ADDRESS_PORT, PCI_TO_CF8_ADDRESS (OVMF_HOSTBRIDGE_DID));
+  HostBridgeDevId = IoRead16 (PCI_CONFIGURATION_DATA_PORT + (UINT16)(OVMF_HOSTBRIDGE_DID & 2));
   switch (HostBridgeDevId) {
   case VIRT_QEMU_DEVICE_ID:
     IoWrite8 (VIRT_RESET_ADDRESS, ACPI_REDUCED_RESET_VALUE);
@@ -128,7 +136,9 @@ ResetShutdown (
 {
   UINT16 HostBridgeDevId;
 
-  HostBridgeDevId = PciRead16 (OVMF_HOSTBRIDGE_DID);
+  //HostBridgeDevId = PciRead16 (OVMF_HOSTBRIDGE_DID);
+  IoWrite32 (PCI_CONFIGURATION_ADDRESS_PORT, PCI_TO_CF8_ADDRESS (OVMF_HOSTBRIDGE_DID));
+  HostBridgeDevId = IoRead16 (PCI_CONFIGURATION_DATA_PORT + (UINT16)(OVMF_HOSTBRIDGE_DID & 2));
   switch (HostBridgeDevId) {
   case VIRT_QEMU_DEVICE_ID:
     AcpiReducedSleepControl (ACPI_REDUCED_SLEEP_TYPE);
