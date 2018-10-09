@@ -29,6 +29,7 @@
 
 #include <Protocol/PciHotPlugInit.h>
 #include <Protocol/PciRootBridgeIo.h>
+#include "OvmfPlatforms.h"
 
 //
 // TRUE if the PCI platform supports extended config space, FALSE otherwise.
@@ -793,10 +794,11 @@ DriverInitialize (
   IN EFI_SYSTEM_TABLE *SystemTable
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS Status; 
+  UINT16 hostBridgeId = PcdGet16 (PcdOvmfHostBridgePciDevId);
 
-  mPciExtConfSpaceSupported = (PcdGet16 (PcdOvmfHostBridgePciDevId) ==
-                               INTEL_Q35_MCH_DEVICE_ID);
+  mPciExtConfSpaceSupported = ((hostBridgeId == INTEL_Q35_MCH_DEVICE_ID) ||
+	                       (hostBridgeId == VIRT_QEMU_DEVICE_ID));
 
   mPciHotPlugInit.GetRootHpcList = GetRootHpcList;
   mPciHotPlugInit.InitializeRootHpc = InitializeRootHpc;

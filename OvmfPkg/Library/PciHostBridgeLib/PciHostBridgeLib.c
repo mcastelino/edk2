@@ -29,6 +29,7 @@
 #include <Library/PciLib.h>
 #include <Library/QemuFwCfgLib.h>
 #include "PciHostBridge.h"
+#include "OvmfPlatforms.h"
 
 
 #pragma pack(1)
@@ -130,6 +131,7 @@ InitRootBridge (
   )
 {
   OVMF_PCI_ROOT_BRIDGE_DEVICE_PATH *DevicePath;
+  UINT16 hostBridgeId;
 
   //
   // Be safe if other fields are added to PCI_ROOT_BRIDGE later.
@@ -152,8 +154,10 @@ InitRootBridge (
   CopyMem (&RootBus->PMem, PMem, sizeof (*PMem));
   CopyMem (&RootBus->PMemAbove4G, PMemAbove4G, sizeof (*PMemAbove4G));
 
-  RootBus->NoExtendedConfigSpace = (PcdGet16 (PcdOvmfHostBridgePciDevId) !=
-                                    INTEL_Q35_MCH_DEVICE_ID);
+  hostBridgeId = PcdGet16(PcdOvmfHostBridgePciDevId);
+
+  RootBus->NoExtendedConfigSpace = ((hostBridgeId != INTEL_Q35_MCH_DEVICE_ID) &&
+	                            (hostBridgeId != VIRT_QEMU_DEVICE_ID));
 
   DevicePath = AllocateCopyPool (sizeof mRootBridgeDevicePathTemplate,
                  &mRootBridgeDevicePathTemplate);
