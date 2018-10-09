@@ -45,3 +45,4 @@
 
 [Pcd]
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfHostBridgePciDevId
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfMachineId

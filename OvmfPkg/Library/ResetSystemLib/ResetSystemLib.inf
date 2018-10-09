@@ -41,4 +41,4 @@
   TimerLib
 
 [Pcd]
-  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfHostBridgePciDevId
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfMachineId

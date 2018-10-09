@@ -640,6 +640,7 @@ InitializePlatform (
   )
 {
   EFI_STATUS    Status;
+  RETURN_STATUS PcdStatus;
 
   DEBUG ((DEBUG_INFO, "Platform PEIM Loaded\n"));
 
@@ -661,6 +662,9 @@ InitializePlatform (
 
   QemuFwCfgSelectItem (QemuFwCfgItemMachineId);
   mMachineId = QemuFwCfgRead16 ();
+
+  PcdStatus = PcdSet16S (PcdOvmfMachineId, mMachineId);
+  ASSERT_RETURN_ERROR (PcdStatus);
 
   switch (mMachineId) {
     case X86_I440FX:

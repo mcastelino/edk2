@@ -151,6 +151,11 @@
   #  This PCD is only accessed if PcdSmmSmramRequire is TRUE (see below).
   gUefiOvmfPkgTokenSpaceGuid.PcdQ35TsegMbytes|8|UINT16|0x20
 
+  ## The 16-bit MachineId indentifying the machine type
+  #  supplied by the hypervisor.
+  #
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfMachineId|0|UINT16|0x28
+
 [PcdsFeatureFlag]
   gUefiOvmfPkgTokenSpaceGuid.PcdQemuBootOrderPciTranslation|TRUE|BOOLEAN|0x1c
   gUefiOvmfPkgTokenSpaceGuid.PcdQemuBootOrderMmioTranslation|FALSE|BOOLEAN|0x1d

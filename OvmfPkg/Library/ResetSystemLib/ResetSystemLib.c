@@ -23,7 +23,7 @@
 
 #include "OvmfPlatforms.h"
 
-static UINT16 mHostBridgeDevId;
+static UINT16 mOvmfMachineId;
 
 RETURN_STATUS
 EFIAPI
@@ -31,7 +31,7 @@ ResetSystemLibConstructor (
   VOID
   )
 {
-  mHostBridgeDevId = PcdGet16 (PcdOvmfHostBridgePciDevId);
+  mOvmfMachineId = PcdGet16 (PcdOvmfMachineId);
 
   return RETURN_SUCCESS;
 }
@@ -47,11 +47,11 @@ AcpiPmControl (
   ASSERT (SuspendType < 6);
 
   AcpiPmBaseAddress = 0;
-  switch (mHostBridgeDevId) {
-  case INTEL_82441_DEVICE_ID:
+  switch (mOvmfMachineId) {
+  case X86_I440FX:
     AcpiPmBaseAddress = PIIX4_PMBA_VALUE;
     break;
-  case INTEL_Q35_MCH_DEVICE_ID:
+  case X86_Q35:
     AcpiPmBaseAddress = ICH9_PMBASE_VALUE;
     break;
   default:
@@ -112,8 +112,8 @@ ResetWarm (
   )
 {
 
-  switch (mHostBridgeDevId) {
-  case VIRT_QEMU_DEVICE_ID:
+  switch (mOvmfMachineId) {
+  case X86_VIRT:
     IoWrite8 (VIRT_RESET_ADDRESS, ACPI_REDUCED_RESET_VALUE);
     CpuDeadLoop ();
     break;
@@ -138,8 +138,8 @@ ResetShutdown (
   )
 {
 
-  switch (mHostBridgeDevId) {
-  case VIRT_QEMU_DEVICE_ID:
+  switch (mOvmfMachineId) {
+  case X86_VIRT:
     AcpiReducedSleepControl (ACPI_REDUCED_SLEEP_TYPE);
     break;
   default:

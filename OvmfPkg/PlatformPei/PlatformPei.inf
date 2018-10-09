@@ -81,6 +81,7 @@
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfLockBoxStorageSize
   gUefiOvmfPkgTokenSpaceGuid.PcdGuidedExtractHandlerTableSize
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfHostBridgePciDevId
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfMachineId
   gUefiOvmfPkgTokenSpaceGuid.PcdPciIoBase
   gUefiOvmfPkgTokenSpaceGuid.PcdPciIoSize
   gUefiOvmfPkgTokenSpaceGuid.PcdPciMmio32Base
