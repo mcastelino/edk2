@@ -19,6 +19,7 @@
   MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0
   LIBRARY_CLASS                  = ResetSystemLib
+  CONSTRUCTOR                    = ResetSystemLibConstructor
 
 #
 # The following information is for reference only and not required by the build tools.
@@ -36,5 +37,8 @@
 [LibraryClasses]
   DebugLib
   IoLib
-  PciLib
+  PcdLib
   TimerLib
+
+[Pcd]
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfHostBridgePciDevId

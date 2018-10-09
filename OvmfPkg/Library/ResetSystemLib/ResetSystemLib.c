@@ -18,9 +18,24 @@
 #include <Library/DebugLib.h>
 #include <Library/IoLib.h>
 #include <Library/TimerLib.h>
+#include <Library/PcdLib.h>
 #include <OvmfPlatforms.h>
 
-#include <OvmfPlatforms.h>
+#include "OvmfPlatforms.h"
+
+static UINT16 mHostBridgeDevId;
+
+RETURN_STATUS
+EFIAPI
+ResetSystemLibConstructor (
+  VOID
+  )
+{
+  mHostBridgeDevId = PcdGet16 (PcdOvmfHostBridgePciDevId);
+
+  return RETURN_SUCCESS;
+}
+
 
 VOID
 AcpiPmControl (
@@ -28,13 +43,11 @@ AcpiPmControl (
   )
 {
   UINT16 AcpiPmBaseAddress;
-  UINT16 HostBridgeDevId;
 
   ASSERT (SuspendType < 6);
 
   AcpiPmBaseAddress = 0;
-  HostBridgeDevId = PciRead16 (OVMF_HOSTBRIDGE_DID);
-  switch (HostBridgeDevId) {
+  switch (mHostBridgeDevId) {
   case INTEL_82441_DEVICE_ID:
     AcpiPmBaseAddress = PIIX4_PMBA_VALUE;
     break;
@@ -98,10 +111,8 @@ ResetWarm (
   VOID
   )
 {
-  UINT16 HostBridgeDevId;
 
-  HostBridgeDevId = PciRead16 (OVMF_HOSTBRIDGE_DID);
-  switch (HostBridgeDevId) {
+  switch (mHostBridgeDevId) {
   case VIRT_QEMU_DEVICE_ID:
     IoWrite8 (VIRT_RESET_ADDRESS, ACPI_REDUCED_RESET_VALUE);
     CpuDeadLoop ();
@@ -126,10 +137,8 @@ ResetShutdown (
   VOID
   )
 {
-  UINT16 HostBridgeDevId;
 
-  HostBridgeDevId = PciRead16 (OVMF_HOSTBRIDGE_DID);
-  switch (HostBridgeDevId) {
+  switch (mHostBridgeDevId) {
   case VIRT_QEMU_DEVICE_ID:
     AcpiReducedSleepControl (ACPI_REDUCED_SLEEP_TYPE);
     break;
